@@ -1,19 +1,26 @@
 import React from "react";
 import ReactDOM from "react-dom";
 
-function createStore(initialState) {
-  let state = initialState;
-
-  function dispatch(action) {
-    if (action.type === "test") {
+function testReducer(state, action) {
+  switch (action.type) {
+    case "test":
       let newArray = [...state];
       let elementIndex = newArray.findIndex(
         (el) => el.id === action.payload.id
       );
       newArray[elementIndex].completed = true;
       state = newArray;
-    }
-    console.log(state);
+
+      return newArray;
+    default:
+      break;
+  }
+}
+function createStore(reducer, initialState) {
+  let state = initialState;
+
+  function dispatch(action) {
+    return reducer(state, action);
   }
   function getState() {
     return state;
@@ -25,18 +32,18 @@ function createStore(initialState) {
   };
 }
 
-const store = createStore([{ id: 1, completed: false }]);
+const store = createStore(testReducer, [{ id: 1, completed: false }]);
+console.log(store.getState());
 
 const App = () => {
-  console.log(store.getState());
+  const compliteTask = () => {
+    store.dispatch({ type: "test", payload: { id: 1 } });
+    console.log(store.getState());
+  };
   return (
     <>
       <h1>App</h1>
-      <button
-        onClick={() => store.dispatch({ type: "test", payload: { id: 1 } })}
-      >
-        click
-      </button>
+      <button onClick={compliteTask}>click</button>
     </>
   );
 };
