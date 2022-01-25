@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import ReactDOM from "react-dom";
 
 function testReducer(state, action) {
@@ -18,9 +18,17 @@ function testReducer(state, action) {
 }
 function createStore(reducer, initialState) {
   let state = initialState;
+  let listeners = [];
 
   function dispatch(action) {
-    return reducer(state, action);
+    state = reducer(state, action);
+    for (let i = 0; i < listeners.length; i++) {
+      const listener = listeners[i];
+      listener();
+    }
+  }
+  function subscribe(listener) {
+    listeners.push(listener);
   }
   function getState() {
     return state;
@@ -29,6 +37,7 @@ function createStore(reducer, initialState) {
   return {
     getState,
     dispatch,
+    subscribe,
   };
 }
 
@@ -38,7 +47,14 @@ const store = createStore(testReducer, [
 ]);
 
 const App = () => {
-  const state = store.getState();
+  const [state, setState] = useState(store.getState());
+
+  useEffect(() => {
+    store.subscribe(() => {
+      setState(store.getState());
+    });
+  }, []);
+
   const compliteTask = (taskId) => {
     store.dispatch({ type: "test", payload: { id: taskId } });
     console.log(store.getState());
