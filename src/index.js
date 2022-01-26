@@ -1,13 +1,9 @@
 import React, { useEffect, useState } from "react";
 import ReactDOM from "react-dom";
-import { createStore } from "./store/createStore";
-import { taskReducer } from "./store/taskReducer";
 import * as actions from "./store/actionTypes";
+import { initiateStore } from "./store/store";
 
-const store = createStore(taskReducer, [
-  { id: 1, title: "Task 1", completed: false },
-  { id: 2, title: "Task 2", completed: false },
-]);
+const store = initiateStore();
 
 const App = () => {
   const [state, setState] = useState(store.getState());
