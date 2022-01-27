@@ -1,27 +1,24 @@
-import { createAction } from "@reduxjs/toolkit";
-
+import { createAction, createReducer } from "@reduxjs/toolkit";
+const initialState = [
+  { id: 1, title: "Task 1", completed: false },
+  { id: 2, title: "Task 2", completed: false },
+];
 const update = createAction("taskUpdated");
 const remove = createAction("taskDeleted");
 
-function taskReducer(state = [], action) {
-  switch (action.type) {
-    case update.type:
-      let newArray = [...state];
-      let elementIndex = newArray.findIndex(
-        (el) => el.id === action.payload.id
-      );
-      newArray[elementIndex] = {
-        ...newArray[elementIndex],
+const taskReducer = createReducer(initialState, (builder) => {
+  builder
+    .addCase(update, (state, action) => {
+      const elementIndex = state.findIndex((el) => el.id === action.payload.id);
+      state[elementIndex] = {
+        ...state[elementIndex],
         ...action.payload,
       };
-      return newArray;
-
-    case remove.type:
+    })
+    .addCase(remove, (state, action) => {
       return state.filter((el) => el.id !== action.payload);
-    default:
-      return state;
-  }
-}
+    });
+});
 
 export function taskComplited(id) {
   return update({ id: id, completed: true });
