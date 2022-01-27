@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import ReactDOM from "react-dom";
 import configureStore from "./store/store";
-import * as actions from "./store/task/actions";
+import * as actions from "./store/task";
 
 const store = configureStore();
 
