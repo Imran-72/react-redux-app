@@ -1,24 +1,28 @@
-import { createAction, createReducer } from "@reduxjs/toolkit";
+import { createSlice } from "@reduxjs/toolkit";
 const initialState = [
   { id: 1, title: "Task 1", completed: false },
   { id: 2, title: "Task 2", completed: false },
 ];
-const update = createAction("taskUpdated");
-const remove = createAction("taskDeleted");
 
-const taskReducer = createReducer(initialState, (builder) => {
-  builder
-    .addCase(update, (state, action) => {
+const taskSlice = createSlice({
+  name: "task",
+  initialState,
+  reducers: {
+    update(state, action) {
       const elementIndex = state.findIndex((el) => el.id === action.payload.id);
       state[elementIndex] = {
         ...state[elementIndex],
         ...action.payload,
       };
-    })
-    .addCase(remove, (state, action) => {
+    },
+    remove(state, action) {
       return state.filter((el) => el.id !== action.payload);
-    });
+    },
+  },
 });
+
+const { actions, reducer: taskReducer } = taskSlice;
+const { update, remove } = actions;
 
 export function taskComplited(id) {
   return update({ id: id, completed: true });
