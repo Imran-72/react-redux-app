@@ -1,30 +1,38 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import ReactDOM from "react-dom";
+import { Provider, useDispatch, useSelector } from "react-redux";
+import { getErrors } from "./store/errors";
 import configureStore from "./store/store";
 import * as actions from "./store/task";
 
 const store = configureStore();
 
 const App = () => {
-  const [state, setState] = useState(store.getState());
+  const state = useSelector(actions.getTasks());
+  const isLoading = useSelector(actions.getTasksLoadingStatus());
+  const error = useSelector(getErrors());
+  const dispatch = useDispatch();
 
   useEffect(() => {
-    store.subscribe(() => {
-      setState(store.getState());
-    });
+    dispatch(actions.loadTasks());
   }, []);
 
-  const compliteTask = (taskId) => {
-    store.dispatch(actions.taskComplited(taskId));
-  };
-
   const changeTitle = (taskId) => {
-    store.dispatch(actions.titleChanged(taskId));
+    dispatch(actions.titleChanged(taskId));
   };
 
   const deleteTask = (taskId) => {
-    store.dispatch(actions.taskDeleted(taskId));
+    dispatch(actions.taskDeleted(taskId));
   };
+
+  if (isLoading) {
+    return <h1>Loading...</h1>;
+  }
+
+  if (error) {
+    return <p>{error}</p>;
+  }
+
   return (
     <>
       <h1>App</h1>
@@ -33,7 +41,9 @@ const App = () => {
           <li key={el.id}>
             <p>{el.title}</p>
             <p>{`Completed: ${el.completed}`}</p>
-            <button onClick={() => compliteTask(el.id)}>Completed</button>
+            <button onClick={() => dispatch(actions.compliteTask(el.id))}>
+              Completed
+            </button>
             <button onClick={() => changeTitle(el.id)}>Change title</button>
             <button onClick={() => deleteTask(el.id)}>Delete</button>
             <hr />
@@ -46,7 +56,9 @@ const App = () => {
 
 ReactDOM.render(
   <React.StrictMode>
-    <App />
+    <Provider store={store}>
+      <App />
+    </Provider>
   </React.StrictMode>,
   document.getElementById("root")
 );

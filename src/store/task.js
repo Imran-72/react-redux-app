@@ -1,32 +1,55 @@
 import { createSlice } from "@reduxjs/toolkit";
-const initialState = [
-  { id: 1, title: "Task 1", completed: false },
-  { id: 2, title: "Task 2", completed: false },
-];
+import todosServices from "../services/todosServices";
+import { setError } from "./errors";
+const initialState = { entities: [], isLoading: true, error: null };
 
 const taskSlice = createSlice({
   name: "task",
   initialState,
   reducers: {
+    recived(state, action) {
+      state.entities = action.payload;
+      state.isLoading = false;
+    },
     update(state, action) {
-      const elementIndex = state.findIndex((el) => el.id === action.payload.id);
-      state[elementIndex] = {
-        ...state[elementIndex],
+      const elementIndex = state.entities.findIndex(
+        (el) => el.id === action.payload.id
+      );
+      state.entities[elementIndex] = {
+        ...state.entities[elementIndex],
         ...action.payload,
       };
     },
     remove(state, action) {
-      return state.filter((el) => el.id !== action.payload);
+      state.entities = state.entities.filter((el) => el.id !== action.payload);
+    },
+    taskRequested(state, action) {
+      state.isLoading = true;
+    },
+    taskRequestedField(state, action) {
+      state.error = action.payload;
+      state.isLoading = false;
     },
   },
 });
 
 const { actions, reducer: taskReducer } = taskSlice;
-const { update, remove } = actions;
+const { recived, update, remove, taskRequested, taskRequestedField } = actions;
 
-export function taskComplited(id) {
-  return update({ id: id, completed: true });
-}
+export const loadTasks = () => async (dispatch) => {
+  dispatch(taskRequested());
+  try {
+    const data = await todosServices.fetch();
+    dispatch(recived(data));
+  } catch (error) {
+    dispatch(taskRequestedField());
+    dispatch(setError(error.message));
+  }
+};
+
+export const compliteTask = (id) => (dispatch) => {
+  dispatch(update({ id, completed: true }));
+};
 
 export function titleChanged(id) {
   return update({ id: id, title: `New title for ${id}` });
@@ -35,5 +58,8 @@ export function titleChanged(id) {
 export function taskDeleted(id) {
   return remove(id);
 }
+
+export const getTasks = () => (state) => state.tasks.entities;
+export const getTasksLoadingStatus = () => (state) => state.tasks.isLoading;
 
 export default taskReducer;
