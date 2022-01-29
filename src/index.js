@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import ReactDOM from "react-dom";
 import { Provider, useDispatch, useSelector } from "react-redux";
 import { getErrors } from "./store/errors";
@@ -8,6 +8,7 @@ import * as actions from "./store/task";
 const store = configureStore();
 
 const App = () => {
+  const [value, setValue] = useState("");
   const state = useSelector(actions.getTasks());
   const isLoading = useSelector(actions.getTasksLoadingStatus());
   const error = useSelector(getErrors());
@@ -50,6 +51,18 @@ const App = () => {
           </li>
         ))}
       </ul>
+      <div>
+        <div>
+          <input value={value} onChange={(e) => setValue(e.target.value)} />
+        </div>
+        <button
+          onClick={() =>
+            dispatch(actions.createTask({ title: value, completed: false }))
+          }
+        >
+          Create Task
+        </button>
+      </div>
     </>
   );
 };
